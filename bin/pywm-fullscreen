@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+SOURCE=${BASH_SOURCE[0]}
+while [ -h "$SOURCE" ]; do
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE
+done
+DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+
+
+LOGDIR=$HOME
+if [ "$LOGDIR" = "/" ]; then 
+    echo "Switching to tmp" 
+    LOGDIR="/tmp"
+else
+    LOGDIR="$LOGDIR/.cache"
+fi;
+
+mkdir -p $LOGDIR
+pushd $LOGDIR
+if [ -e pywm-grid_log_bu1 ]
+    then cp pywm-grid_log_bu1 pywm-grid_log_bu2
+fi
+if [ -e pywm-fullscreen_log ]
+    then cp pywm-grid_log pywm-grid_log_bu1
+fi
+popd
+
+echo "pywm-grid - script dir is $DIR, log dir is $LOGDIR, arguments are $@"
+exec $DIR/.pywm-grid "$@" > $LOGDIR/pywm-grid_log 2>&1
