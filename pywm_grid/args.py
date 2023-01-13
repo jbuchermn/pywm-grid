@@ -11,6 +11,7 @@ parser.add_argument("-c", "--xcursor-theme", type=str, default="Adwaita")
 parser.add_argument("-s", "--xcursor-size", type=int, default=24)
 parser.add_argument("-n", "--no-natural-scroll", action="store_true")
 
+parser.add_argument("-x", "--xwayland", action="store_true")
 parser.add_argument("-S", "--scale", type=int, default=1)
 
 args = parser.parse_args()

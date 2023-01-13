@@ -28,7 +28,7 @@ conf_pywm: dict[str, Any] = {
     'natural_scroll': not args.no_natural_scroll,
 
     'encourage_csd': False,
-    'enable_xwayland': True,
+    'enable_xwayland': args.xwayland,
     'texture_shaders': 'noeffect'
 }
 conf_outputs: list[dict[str, Any]] = []
