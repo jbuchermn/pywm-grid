@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeVar
 
 import logging
+from math import floor
 
 from pywm import PyWMView, PyWMViewDownstreamState
 from pywm.pywm_view import PyWMViewUpstreamState
@@ -18,12 +19,30 @@ class View(PyWMView[Compositor]):
         PyWMView.__init__(self, wm, handle)
         logger.debug("New view - %s" % self.up_state)
 
+        self.j, self.i = self.wm.grid.find_next_app()  # Transpose
+
     def init(self) -> PyWMViewDownstreamState:
         if self.up_state is None:
             return PyWMViewDownstreamState()
 
-        res = PyWMViewDownstreamState(self._handle, (self.wm.layout[0].pos[0] - self.up_state.offset[0], self.wm.layout[0].pos[1] - self.up_state.offset[1], self.wm.layout[0].width, self.wm.layout[0].height), accepts_input=True)
-        res.size = self.wm.layout[0].width, self.wm.layout[0].height
+        i, j = self.i, self.j
+
+        x = self.wm.layout[0].pos[0] - self.up_state.offset[0] + i*floor(self.wm.layout[0].width/self.wm.grid.get_width())
+        y = self.wm.layout[0].pos[1] - self.up_state.offset[1] + j*floor(self.wm.layout[0].height/self.wm.grid.get_height())
+
+
+        if i == self.wm.grid.get_width() - 1:
+            width = self.wm.layout[0].width - (self.wm.grid.get_width() - 1) * floor(self.wm.layout[0].width/self.wm.grid.get_width())
+        else:
+            width = floor(self.wm.layout[0].width/self.wm.grid.get_width())
+
+        if j == self.wm.grid.get_height() - 1:
+            height = self.wm.layout[0].height - (self.wm.grid.get_height() - 1) * floor(self.wm.layout[0].height/self.wm.grid.get_height())
+        else:
+            height = floor(self.wm.layout[0].height/self.wm.grid.get_height())
+
+        res = PyWMViewDownstreamState(self._handle, (x, y, width, height), accepts_input=True)
+        res.size = width, height
 
         self.focus()
 

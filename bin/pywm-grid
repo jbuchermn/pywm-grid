@@ -21,7 +21,7 @@ pushd $LOGDIR
 if [ -e pywm-grid_log_bu1 ]
     then cp pywm-grid_log_bu1 pywm-grid_log_bu2
 fi
-if [ -e pywm-fullscreen_log ]
+if [ -e pywm-grid_log ]
     then cp pywm-grid_log pywm-grid_log_bu1
 fi
 popd

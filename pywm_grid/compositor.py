@@ -12,6 +12,7 @@ from pywm import (
 
 from .view import View
 from .args import args
+from .grid import Grid
 
 conf_pywm: dict[str, Any] = {
     'xkb_model': args.keyboard_model,
@@ -41,9 +42,24 @@ class Compositor(PyWM[View]):
     def main(self) -> None:
         logger.debug("Compositor main...")
         self.update_cursor()
-        os.system("alacritty &")
 
-        time.sleep(2.)
+        if args.grid is None:
+            logger.error("No grid file specified")
+            self.terminate()
+            return
+        else:
+            logger.debug("Grid file: %s", args.grid)
+            self.grid = Grid(args.grid)
+
+        while (app := self.grid.next_app()) is not None:
+            logger.debug("Starting %s...", app) 
+            os.system("%s &" % app)
+            for i in range(3):
+                time.sleep(.1)
+                if not self.grid.still_waiting():
+                    break
+            else:
+                logger.warn("Could not open %s...", app) 
 
         if len(self._views) == 0:
             self.terminate()

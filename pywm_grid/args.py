@@ -1,6 +1,8 @@
 import argparse
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-g", "--grid", type=str)
+
 parser.add_argument("-k", "--keyboard-model", type=str, default="macintosh")
 parser.add_argument("-l", "--keyboard-layout", type=str, default="de,de")
 parser.add_argument("-o", "--keyboard-options", type=str, default="caps:escape")
