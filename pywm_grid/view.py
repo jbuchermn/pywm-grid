@@ -7,6 +7,9 @@ from math import floor
 from pywm import PyWMView, PyWMViewDownstreamState
 from pywm.pywm_view import PyWMViewUpstreamState
 
+from .args import args
+
+
 if TYPE_CHECKING:
     from .compositor import Compositor
 else:
@@ -19,11 +22,17 @@ class View(PyWMView[Compositor]):
         PyWMView.__init__(self, wm, handle)
         logger.debug("New view - %s" % self.up_state)
 
-        self.j, self.i = self.wm.grid.find_next_app()  # Transpose
+        self.j, self.i = self.wm.grid.find_view(self.pid) if self.pid is not None else (-1, -1)  # Transpose
+
+        self._counter = 0
 
     def init(self) -> PyWMViewDownstreamState:
         if self.up_state is None:
             return PyWMViewDownstreamState()
+
+        if self.i == -1 and self.pid is not None:
+            self.j, self.i = self.wm.grid.find_view(self.pid) # Transpose
+            self.damage()
 
         i, j = self.i, self.j
 
@@ -42,9 +51,18 @@ class View(PyWMView[Compositor]):
             height = floor(self.wm.layout[0].height/self.wm.grid.get_height())
 
         res = PyWMViewDownstreamState(self._handle, (x, y, width, height), accepts_input=True)
-        res.size = width, height
 
-        self.focus()
+
+        width *= args.scale
+        height *= args.scale
+
+        # Bugs in vlc and mpv - they require one size change at least
+        if self._counter < 20:
+            res.size = width + 10, height + 10
+            self._counter += 1
+            self.damage()
+        else:
+            res.size = width, height
 
         return res
 

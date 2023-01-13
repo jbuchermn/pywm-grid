@@ -22,6 +22,8 @@ class Grid:
         self._waiting = False
         self._at = (0, -1)
 
+        self._ats: dict[int, tuple[int, int]] = {}
+
     def get_width(self) -> int:
         return max([len(v) for v in self.grid])
 
@@ -41,15 +43,13 @@ class Grid:
             v = self.grid[self._at[0]]
             if self._at[1] < len(v):
 
-                self._waiting = True
                 return v[self._at[1]]
 
         return None
 
-    def find_next_app(self) -> tuple[int, int]:
-        self._waiting = False
-        return self._at
+    def started_next_app(self, pid: int) -> None:
+        self._ats[pid] = self._at
 
-    def still_waiting(self) -> bool:
-        return self._waiting
+    def find_view(self, pid: int) -> tuple[int, int]:
+        return self._ats[pid] if pid in self._ats else (0, 0)
 
