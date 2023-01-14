@@ -24,8 +24,6 @@ class View(PyWMView[Compositor]):
 
         self.j, self.i = self.wm.grid.find_view(self.pid) if self.pid is not None else (-1, -1)  # Transpose
 
-        self._counter = 0
-
     def init(self) -> PyWMViewDownstreamState:
         if self.up_state is None:
             return PyWMViewDownstreamState()
@@ -50,19 +48,24 @@ class View(PyWMView[Compositor]):
         else:
             height = floor(self.wm.layout[0].height/self.wm.grid.get_height())
 
-        res = PyWMViewDownstreamState(self._handle, (x, y, width, height), accepts_input=True)
-
+        res = PyWMViewDownstreamState(self._handle, (x, y, width, height), accepts_input=True, floating=False)
 
         width *= args.scale
         height *= args.scale
 
-        # Bugs in vlc and mpv - they require one size change at least
-        if self._counter < 20:
-            res.size = width + 10, height + 10
-            self._counter += 1
+        logger.debug("View has size %dx%d", *self.up_state.size)
+
+        """
+        Workaround due to mpv bug - it needs to set its own size first
+        to truly believe the size we're requesting is what we want
+        """
+        if self.up_state.size != (0, 0):
+            res.size = (width, height)
+            self.force_size()
+
+        if self.up_state.size != res.size:
+            res.opacity = 0.
             self.damage()
-        else:
-            res.size = width, height
 
         return res
 
